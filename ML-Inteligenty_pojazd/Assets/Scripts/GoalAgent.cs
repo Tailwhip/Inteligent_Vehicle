@@ -128,19 +128,20 @@ public class GoalAgent : Agent {
         intensity = (1f - (intensity1.magnitude / 100f)) + (1f - (intensity2.magnitude / 100f)) + (1f - (intensity3.magnitude / 100f)) + (1f - (intensity4.magnitude / 100f));
 
         //intensity = ((1f - phototransistor1.intensity) * 100f) + ((1f - phototransistor2.intensity) * 100f) + ((1f - phototransistor3.intensity) * 100f) + ((1f - phototransistor4.intensity) * 100f);
-
+        
         deltaCounter--;
         // counting delta intensity and use it to punish or reward:
         if (deltaCounter == 0)
         {
             deltaCounter = 1;
             deltaIntensity = intensity - intensityOld;
-            if (deltaIntensity <= 0.0f)
+            if (deltaIntensity <= 0.02f)
             {
                 AddReward(-0.005f);
                 //Debug.Log("LOOSE1");
                 looseCount++;
             }
+
             /*
             else
             {
@@ -152,6 +153,7 @@ public class GoalAgent : Agent {
             intensityOld = intensity;
         }
         
+        AddReward(-0.005f);
         // for delta distance input: 
         if (intensity > 3.7f)
         {
