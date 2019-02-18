@@ -54,8 +54,7 @@ public class GoalAgent : Agent {
         base.InitializeAgent();
 
         // initialise delta intensity variables:
-        //intensity = (1f - (intensity1.magnitude / 100f)) + (1f - (intensity2.magnitude / 100f)) + (1f - (intensity3.magnitude / 100f)) + (1f - (intensity4.magnitude / 100f));
-        intensity = intensity1.magnitude + intensity2.magnitude + intensity3.magnitude + intensity4.magnitude;
+        intensity = (1f - (intensity1.magnitude / 100f)) + (1f - (intensity2.magnitude / 100f)) + (1f - (intensity3.magnitude / 100f)) + (1f - (intensity4.magnitude / 100f));
         intensityOld = 0.0f;
 
         // initialise reset position variables:
@@ -64,8 +63,6 @@ public class GoalAgent : Agent {
         vehicleStartPos = this.transform.position;
         lightStartPos = LightSource.transform.position;
         wallStartPos = wall.transform.position;
-        
-
     }
 
     //Reward conditions:
@@ -126,8 +123,6 @@ public class GoalAgent : Agent {
         intensity4.Set((LightSource.transform.position.x - phototransistor4.transform.position.x), (LightSource.transform.position.z - phototransistor4.transform.position.z));
 
         intensity = (1f - (intensity1.magnitude / 100f)) + (1f - (intensity2.magnitude / 100f)) + (1f - (intensity3.magnitude / 100f)) + (1f - (intensity4.magnitude / 100f));
-
-        //intensity = ((1f - phototransistor1.intensity) * 100f) + ((1f - phototransistor2.intensity) * 100f) + ((1f - phototransistor3.intensity) * 100f) + ((1f - phototransistor4.intensity) * 100f);
         
         deltaCounter--;
         // counting delta intensity and use it to punish or reward:

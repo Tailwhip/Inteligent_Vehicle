@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.IO;
 
 public class ANN{
 
@@ -138,7 +139,6 @@ public class ANN{
 		return outputValues;
 	}
 
-
 	public string PrintWeights()
 	{
 		string weightStr = "";
@@ -220,7 +220,7 @@ public class ANN{
 
 	double ActivationFunction(double value)
 	{
-		return LeakyReLu(value);
+		return TanH(value);
 	}
 
 	double ActivationFunctionO(double value)

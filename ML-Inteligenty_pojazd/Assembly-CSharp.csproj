@@ -179,6 +179,7 @@
     <Compile Include="Assets\Zombunny\ZombunnyAcademy.cs" />
     <Compile Include="Assets\Zombunny\ZombunnyAgent.cs" />
     <Compile Include="Assets\Zombunny\ZombunnyDecision.cs" />
+    <None Include="Assets\weights.txt" />
     <Reference Include="UnityEditor.StandardEvents">
       <HintPath>C:/ml-agents/ML-Inteligenty_pojazd/Library/ScriptAssemblies/UnityEditor.StandardEvents.dll</HintPath>
     </Reference>
