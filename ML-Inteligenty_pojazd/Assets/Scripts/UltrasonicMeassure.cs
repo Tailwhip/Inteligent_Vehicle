@@ -14,7 +14,6 @@ public class UltrasonicMeassure : MonoBehaviour {
     public float distanceOld = 0;
     public int deltaCounter = 1;
     
-
     void Update()
     {
         deltaCounter--;
@@ -25,16 +24,18 @@ public class UltrasonicMeassure : MonoBehaviour {
             distanceOld = distance;
         }
 
-        float dist = 0f;
+        //float dist = 0f;
         int layerMask = 1 << 11;
         RaycastHit hit;
-        if (Physics.Raycast(ultrasonicSensor.position, ultrasonicSensor.transform.forward, out hit, visibleDistance, layerMask))
+        if (Physics.Raycast(ultrasonicSensor.transform.position, ultrasonicSensor.transform.forward, out hit, visibleDistance, layerMask))
         {
             Debug.DrawRay(ultrasonicSensor.position, ultrasonicSensor.transform.forward * hit.distance, Color.red);
-            dist = 1 - hit.distance / visibleDistance;
+            //dist = 1 - hit.distance / visibleDistance;
+            distance = hit.distance;
         }
-        dist = Round(dist);
-        distance = Mathf.Clamp(dist, 0, 1);
+        
+        //distance = Mathf.Clamp(dist, 0, 1);
+        
     }
    
     float Round(float x)
