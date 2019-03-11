@@ -1,0 +1,21 @@
+11 wejść:
+AddVectorObs(US1distance);
+AddVectorObs(US2distance);
+AddVectorObs(US3distance);
+AddVectorObs(US4distance);
+AddVectorObs(US5distance);
+
+AddVectorObs(rb.velocity.x);
+AddVectorObs(rb.velocity.z);
+
+AddVectorObs(1f - (intensity1.magnitude / 100f));
+AddVectorObs(1f - (intensity2.magnitude / 100f));
+AddVectorObs(1f - (intensity3.magnitude / 100f));
+AddVectorObs(1f - (intensity4.magnitude / 100f));
+______________________________________________________________________________________________________
+2 wyjścia:
+
+this.transform.position += this.transform.forward * Mathf.Clamp(act[0], -1f, 1f) * 0.5f;
+this.transform.Rotate(0, Mathf.Clamp(act[1], -1f, 1f) * 2f, 0, 0);
+______________________________________________________________________________________________________
+Zwiększenie max steps z 1000 na 2000
