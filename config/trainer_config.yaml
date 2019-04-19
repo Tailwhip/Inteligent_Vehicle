@@ -260,7 +260,7 @@ BasicLearning:
     time_horizon: 3
 
 AgentLearningBrain:
-    max_steps: 3.0e5
+    max_steps: 1.5e7
     batch_size: 128
     buffer_size: 2048
     beta: 5.0e-3
