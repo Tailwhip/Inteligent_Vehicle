@@ -166,19 +166,11 @@
     <Compile Include="Assets\ML-Agents\Scripts\SocketCommunicator.cs" />
     <Compile Include="Assets\ML-Agents\Scripts\UnityAgentsException.cs" />
     <Compile Include="Assets\ML-Agents\Scripts\Utilities.cs" />
-    <Compile Include="Assets\Scripts\ANN\ANN.cs" />
-    <Compile Include="Assets\Scripts\ANN\Layer.cs" />
-    <Compile Include="Assets\Scripts\ANN\Neuron.cs" />
+    <Compile Include="Assets\Scripts\AccelerometerMeassure.cs" />
     <Compile Include="Assets\Scripts\GoalAcademy.cs" />
     <Compile Include="Assets\Scripts\GoalAgent.cs" />
-    <Compile Include="Assets\Scripts\GUIController.cs" />
     <Compile Include="Assets\Scripts\PhototransistorMeassure.cs" />
-    <Compile Include="Assets\Scripts\PTRefLab.cs" />
     <Compile Include="Assets\Scripts\UltrasonicMeassure.cs" />
-    <Compile Include="Assets\Scripts\VehicleController.cs" />
-    <Compile Include="Assets\Zombunny\ZombunnyAcademy.cs" />
-    <Compile Include="Assets\Zombunny\ZombunnyAgent.cs" />
-    <Compile Include="Assets\Zombunny\ZombunnyDecision.cs" />
     <None Include="Assets\TestValues.txt" />
     <Reference Include="Unity.TextMeshPro.Editor">
       <HintPath>C:/ml-agents/ML-Inteligenty_pojazd/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>

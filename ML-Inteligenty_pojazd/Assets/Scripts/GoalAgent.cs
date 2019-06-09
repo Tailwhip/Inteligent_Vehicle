@@ -7,22 +7,16 @@ using System.IO;
 
 public class GoalAgent : Agent {
 
-    /// Wheels input
-    public WheelCollider rightWheel_C, leftWheel_C, backWheel_C;
-    public Transform rightWheel_T, leftWheel_T, backWheel_T;
-    public GameObject LightSource;
-
     /// Objects:
     private Rigidbody rb;
     public GameObject wall;
     public GameObject wall2;
+    public GameObject lightSource;
 
     /// variables for reset the agent:
     private Quaternion vehicleStartRot;
     private Vector3 vehicleStartPos;
     private Vector3 lightStartPos;
-    private float looseCount = 0f;
-    private float winCount = 0f;
     private float showReward = 0f;
     private Vector3 wallStartPos;
     private Quaternion wallStartRot;
@@ -31,53 +25,29 @@ public class GoalAgent : Agent {
 
     /// Ultrasonic sensors input
     public UltrasonicMeassure ultraSens1;
-    private Rigidbody rbUS1;
     public UltrasonicMeassure ultraSens2;
-    private Rigidbody rbUS2;
     public UltrasonicMeassure ultraSens3;
-    private Rigidbody rbUS3;
     public UltrasonicMeassure ultraSens4;
-    private Rigidbody rbUS4;
     public UltrasonicMeassure ultraSens5;
-    private Rigidbody rbUS5;
 
-    private float visibleDistance = 50f;
-    private float US1distance = 0f;
-    private float US2distance = 0f;
-    private float US3distance = 0f;
-    private float US4distance = 0f;
-    private float US5distance = 0f;
-
-    public float US1deltaDistance = 1f;
-    public float US2deltaDistance = 1f;
-    public float US3deltaDistance = 1f;
-    public float US4deltaDistance = 1f;
-    public float US5deltaDistance = 1f;
-
-    public float US1distanceOld = 0f;
-    public float US2distanceOld = 0f;
-    public float US3distanceOld = 0f;
-    public float US4distanceOld = 0f;
-    public float US5distanceOld = 0f;
-
-    /// Phototransistor sensors input 
+    /// Phototransistor sensors input
     public PhototransistorMeassure phototransistor1;
     public PhototransistorMeassure phototransistor2;
     public PhototransistorMeassure phototransistor3;
     public PhototransistorMeassure phototransistor4;
+    
+    /// Velocity input
+    public AccelerometerMeassure accelerometer;
+    List<float> velX = new List<float>();
+    List<float> velZ = new List<float>();
 
+    /// Variables for saving vector observation:
     List<float> US1dist = new List<float>();
     List<float> US2dist = new List<float>();
     List<float> US3dist = new List<float>();
     List<float> US4dist = new List<float>();
     List<float> US5dist = new List<float>();
 
-    /// Velocity input
-    private float velMax = 39f;
-    List<float> velX = new List<float>();
-    List<float> velZ = new List<float>();
-
-    /// Variables for saving vector observation:
     List<float> intens1 = new List<float>();
     List<float> intens2 = new List<float>();
     List<float> intens3 = new List<float>();
@@ -92,41 +62,23 @@ public class GoalAgent : Agent {
     private float intensity = 0f;
     private int deltaCounter = 1;
 
-    /// Light intensity input:
-    private float intesityMax = 120f;
-    private Vector2 intens1_vect;
-    private Vector2 intens2_vect;
-    private Vector2 intens3_vect;
-    private Vector2 intens4_vect;
-
-    private float intensity1;
-    private float intensity2;
-    private float intensity3;
-    private float intensity4;
-
-    private bool startRes = true;
-
     public override void InitializeAgent()
     {
         base.InitializeAgent();
 
         /// initialise delta intensity variables:
-        intensity = intensity1 + intensity2 + intensity3 + intensity4;
+        intensity = phototransistor1.intensity + phototransistor2.intensity + phototransistor3.intensity + phototransistor4.intensity;
         intensityOld = 0.0f;
 
         /// initialise reset position variables:
         rb = this.GetComponent<Rigidbody>();
-        rbUS1 = ultraSens1.GetComponent<Rigidbody>();
-        rbUS2 = ultraSens2.GetComponent<Rigidbody>();
-        rbUS3 = ultraSens3.GetComponent<Rigidbody>();
-        rbUS4 = ultraSens4.GetComponent<Rigidbody>();
-        rbUS5 = ultraSens5.GetComponent<Rigidbody>();
         vehicleStartRot = this.transform.rotation;
         vehicleStartPos = this.transform.position;
-        lightStartPos = LightSource.transform.position;
+        lightStartPos = lightSource.transform.position;
+
         wallStartPos = wall.transform.position;
         wallStartRot = wall.transform.rotation;
-
+    
         wall2StartPos = wall2.transform.position;
         wall2StartRot = wall2.transform.rotation;
     }
@@ -149,20 +101,22 @@ public class GoalAgent : Agent {
     /// Collecting Input:
     public override void CollectObservations()
     {
-        AddVectorObs(US1distance);
-        AddVectorObs(US2distance);
-        AddVectorObs(US3distance);
-        AddVectorObs(US4distance);
-        AddVectorObs(US5distance);
+        AddVectorObs(ultraSens1.distance);
+        AddVectorObs(ultraSens2.distance);
+        AddVectorObs(ultraSens3.distance);
+        AddVectorObs(ultraSens4.distance);
+        AddVectorObs(ultraSens5.distance);
 
-        AddVectorObs(Mathf.Clamp((rb.velocity.x / velMax), 0, 1));
-        AddVectorObs(Mathf.Clamp((rb.velocity.z / velMax), 0, 1));
-        
-        AddVectorObs(intensity1);
-        AddVectorObs(intensity2);
-        AddVectorObs(intensity3);
-        AddVectorObs(intensity4);
+        AddVectorObs(accelerometer.velocityX);
+        AddVectorObs(accelerometer.velocityZ);
 
+        AddVectorObs(phototransistor1.intensity);
+        AddVectorObs(phototransistor2.intensity);
+        AddVectorObs(phototransistor3.intensity);
+        AddVectorObs(phototransistor4.intensity);
+
+        intensity = phototransistor1.intensity + phototransistor2.intensity + phototransistor3.intensity + phototransistor4.intensity;
+        /*
         /// for saving vector observation:
         US1dist.Add(US1distance);
         US2dist.Add(US2distance);
@@ -171,77 +125,24 @@ public class GoalAgent : Agent {
         US5dist.Add(US5distance);
         velX.Add(rb.velocity.x / velMax);
         velZ.Add(rb.velocity.z / velMax);
-        intens1.Add(intensity1);
-        intens2.Add(intensity2);
-        intens3.Add(intensity3);
-        intens4.Add(intensity4);
+        intens1.Add(phototransistor1.intensity);
+        intens2.Add(phototransistor2.intensity);
+        intens3.Add(phototransistor3.intensity);
+        intens4.Add(phototransistor4.intensity);
+        */
     }
 
     /// Moving agent with outputs:
     public override void AgentAction(float[] act, string textAction)
     {
         base.AgentAction(act, textAction);
-
-        /// Ultrasonic sensors distance counting:
-        US1distance = 0f;
-        US2distance = 0f;
-        US3distance = 0f;
-        US4distance = 0f;
-        US5distance = 0f;
-
-        int layerMask = 1 << 11;
-        RaycastHit hit;
-
-        if (Physics.Raycast(this.transform.position, this.transform.forward, out hit, visibleDistance, layerMask))
-        {
-            Debug.DrawRay(this.transform.position, this.transform.forward * hit.distance, Color.red);
-            US1distance = Mathf.Clamp(hit.distance / visibleDistance, 0, 1);
-        }
-
-        if (Physics.Raycast(this.transform.position, this.transform.right, out hit, visibleDistance, layerMask))
-        {
-            Debug.DrawRay(this.transform.position, this.transform.right * hit.distance, Color.red);
-            US2distance = Mathf.Clamp(hit.distance / visibleDistance, 0, 1);
-        }
-        
-        if (Physics.Raycast(this.transform.position, Quaternion.AngleAxis(45, Vector3.up) * -this.transform.right, out hit, visibleDistance, layerMask))
-        {
-            Debug.DrawRay(this.transform.position, Quaternion.AngleAxis(45, Vector3.up) * -this.transform.right * hit.distance, Color.red);
-            US3distance = Mathf.Clamp(hit.distance / visibleDistance, 0, 1);
-        }
-        
-        if (Physics.Raycast(this.transform.position, -this.transform.right, out hit, visibleDistance, layerMask))
-        {
-            Debug.DrawRay(this.transform.position, -this.transform.right * hit.distance, Color.red);
-            US4distance = Mathf.Clamp(hit.distance / visibleDistance, 0, 1);
-        }
-        
-        if (Physics.Raycast(this.transform.position, Quaternion.AngleAxis(-45, Vector3.up) * this.transform.right, out hit, visibleDistance, layerMask))
-        {
-            Debug.DrawRay(this.transform.position, Quaternion.AngleAxis(-45, Vector3.up) * this.transform.right * hit.distance, Color.red);
-            US5distance = Mathf.Clamp(hit.distance / visibleDistance, 0, 1);
-        }
-        
-        /// light intensity counting:
-        intens1_vect.Set((LightSource.transform.position.x - phototransistor1.transform.position.x), (LightSource.transform.position.z - phototransistor1.transform.position.z));
-        intens2_vect.Set((LightSource.transform.position.x - phototransistor2.transform.position.x), (LightSource.transform.position.z - phototransistor2.transform.position.z));
-        intens3_vect.Set((LightSource.transform.position.x - phototransistor3.transform.position.x), (LightSource.transform.position.z - phototransistor3.transform.position.z));
-        intens4_vect.Set((LightSource.transform.position.x - phototransistor4.transform.position.x), (LightSource.transform.position.z - phototransistor4.transform.position.z));
-
-        intensity1 = Mathf.Clamp((1 - intens1_vect.magnitude / intesityMax), 0, 1);
-        intensity2 = Mathf.Clamp((1 - intens2_vect.magnitude / intesityMax), 0, 1);
-        intensity3 = Mathf.Clamp((1 - intens3_vect.magnitude / intesityMax), 0, 1);
-        intensity4 = Mathf.Clamp((1 - intens4_vect.magnitude / intesityMax), 0, 1);
-
-        intensity = intensity1 + intensity2 + intensity3 + intensity4;
-                
-        
+                       
         /// counting delta intensity and use it to punish or reward:
         deltaCounter--;
         if (deltaCounter == 0)
         {
             deltaCounter = 1;
-            deltaIntensity = intensity - intensityOld;
+            deltaIntensity =  intensity - intensityOld;
             if (deltaIntensity <= 0.01f)
             {
                 AddReward(-0.005f);
@@ -253,7 +154,6 @@ public class GoalAgent : Agent {
             intensityOld = intensity;
         }
         
-        //AddReward(-0.001f);
         /// for delta distance input: 
         if (intensity > 3.5f)
         {
@@ -262,12 +162,7 @@ public class GoalAgent : Agent {
         }
 
         ///add position and rotation:
-        //rb.AddForce(this.transform.forward * Mathf.Clamp(act[0], -1f, 1f) * 80f);
-        //rb.AddTorque(transform.up * Mathf.Clamp(act[1], -1f, 1f) * 300f);
-
         rb.AddForce(this.transform.forward * Mathf.Clamp(act[0], -1f, 1f) * 300f);
-
-        //this.transform.position += this.transform.forward * Mathf.Clamp(act[0], -1f, 1f) * 0.5f;
         this.transform.Rotate(0, Mathf.Clamp(act[1], -1f, 1f) * 2f, 0, 0);
 
         ///for saving vector observations:
@@ -283,28 +178,16 @@ public class GoalAgent : Agent {
         this.transform.rotation = vehicleStartRot;
         rb.velocity = new Vector3(0f, 0f, 0f);
         rb.angularVelocity = new Vector3(0f, 0f, 0f);
-        LightSource.transform.position = lightStartPos + new Vector3(Random.Range(-20, 20), 0, (Random.Range(-20, 10)));
+        lightSource.transform.position = lightStartPos + new Vector3(Random.Range(-20, 20), 0, (Random.Range(-20, 10)));
         wall.transform.position = wallStartPos + new Vector3(Random.Range(-10, 10), 0, 0);
         wall.transform.Rotate(0f, Random.Range(-180, 180), 0f, 0);
-        wall.transform.localScale = new Vector3(Random.Range(10, 20), 30, 4);
+        wall.transform.localScale = new Vector3(Random.Range(10, 25), 15, 5);
         wall2.transform.position = wall2StartPos + new Vector3(Random.Range(-10, 10), 0, 0);
         wall2.transform.Rotate(0f, Random.Range(-180, 180), 0f, 0);
-        wall2.transform.localScale = new Vector3(Random.Range(10, 20), 30, 4);
-        deltaCounter = 20;
+        wall2.transform.localScale = new Vector3(Random.Range(10, 25), 15, 5);
+        //deltaCounter = 20;
         intensityOld = 0.0f;
         /*
-        ultraSens1.deltaCounter = 20;
-        ultraSens2.deltaCounter = 20;
-        ultraSens3.deltaCounter = 20;
-        ultraSens4.deltaCounter = 20;
-        ultraSens5.deltaCounter = 20;
-        ultraSens1.distanceOld = 0.0f;
-        ultraSens2.distanceOld = 0.0f;
-        ultraSens3.distanceOld = 0.0f;
-        ultraSens4.distanceOld = 0.0f;
-        ultraSens5.distanceOld = 0.0f;
-        */
-
         //SaveToFile(US1dist, US2dist, US3dist, US4dist, US5dist, velX, velZ, intens1, intens2, intens3, intens4, Q1, Q2, "TestValues");
 
         US1dist.Clear();
@@ -320,12 +203,7 @@ public class GoalAgent : Agent {
         intens4.Clear();
         Q1.Clear();
         Q2.Clear();
-    }
-
-    float Round(float x)
-    {
-        return (float)System.Math.Round(x, 5, System.MidpointRounding.AwayFromZero);
-        //(float)System.Math.Round(x, System.MidpointRounding.AwayFromZero) / 10.0f;
+        */
     }
 
     public void SaveToFile(List<float> US1dist, List<float> US2dist, List<float> US3dist, List<float> US4dist, List<float> US5dist,
@@ -347,28 +225,30 @@ public class GoalAgent : Agent {
     // Showing ANN data:
     private void OnGUI()
     {
-        /*
+        //myGUI();
+    }
+
+    private void myGUI()
+    {
         GUI.color = Color.red;
-        GUI.Label(new Rect(25, 25, 250, 30), "US1: " + Round(US1distance));
-        GUI.Label(new Rect(25, 50, 250, 30), "US2: " + Round(US2distance));
-        GUI.Label(new Rect(25, 75, 250, 30), "US3: " + Round(US3distance));
-        GUI.Label(new Rect(25, 100, 250, 30), "US4: " + Round(US4distance));
-        GUI.Label(new Rect(25, 125, 250, 30), "US5: " + Round(US5distance));
-        
+        GUI.Label(new Rect(25, 25, 250, 30), "US1: " + ultraSens1.distance);
+        GUI.Label(new Rect(25, 50, 250, 30), "US2: " + ultraSens2.distance);
+        GUI.Label(new Rect(25, 75, 250, 30), "US3: " + ultraSens3.distance);
+        GUI.Label(new Rect(25, 100, 250, 30), "US4: " + ultraSens4.distance);
+        GUI.Label(new Rect(25, 125, 250, 30), "US5: " + ultraSens5.distance);
+
         GUI.color = Color.yellow;
-        GUI.Label(new Rect(300, 25, 250, 30), "US1 velocity: " + Mathf.Clamp(Round(rb.velocity.x / velMax), 0, 1));
-        GUI.Label(new Rect(300, 50, 250, 30), "US2 velocity: " + Mathf.Clamp(Round(rb.velocity.z / velMax), 0, 1));
-        
+        GUI.Label(new Rect(300, 25, 250, 30), "Velocity X: " + accelerometer.velocityX);
+        GUI.Label(new Rect(300, 50, 250, 30), "Velocity Z: " + accelerometer.velocityZ);
+
         GUI.color = Color.blue;
-        GUI.Label(new Rect(150, 25, 250, 30), "PT1: " + Round(intensity1));
-        GUI.Label(new Rect(150, 50, 250, 30), "PT2: " + Round(intensity2));
-        GUI.Label(new Rect(150, 75, 250, 30), "PT3: " + Round(intensity3));
-        GUI.Label(new Rect(150, 100, 250, 30), "PT4: " + Round(intensity4));
+        GUI.Label(new Rect(150, 25, 250, 30), "PT1: " + phototransistor1.intensity);
+        GUI.Label(new Rect(150, 50, 250, 30), "PT2: " + phototransistor2.intensity);
+        GUI.Label(new Rect(150, 75, 250, 30), "PT3: " + phototransistor3.intensity);
+        GUI.Label(new Rect(150, 100, 250, 30), "PT4: " + phototransistor4.intensity);
 
         GUI.color = Color.green;
         GUI.Label(new Rect(500, 25, 250, 30), "delta intensity: " + deltaIntensity);
-        GUI.Label(new Rect(500, 50, 250, 30), "reward: " + showReward);
-        GUI.Label(new Rect(500, 75, 250, 30), "Intensity: " + intensity);
-        */
+        GUI.Label(new Rect(500, 50, 250, 30), "Intensity: " + intensity);
     }
 }

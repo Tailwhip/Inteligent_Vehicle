@@ -4,43 +4,21 @@ using UnityEngine;
 
 public class UltrasonicMeassure : MonoBehaviour {
 
-    private float visibleDistance = 105f;
+    private float visibleDistance = 50f;
     public float distance = 0f;
     public Transform ultrasonicSensor;
-    private Vector3 toObstacle;
-
-    // variables to count delta distance: 
-    public float deltaDistance = 1f;
-    public float distanceOld = 0;
-    public int deltaCounter = 1;
     
-    void Update()
+    void FixedUpdate()
     {
-        deltaCounter--;
-        if (deltaCounter == 0)
-        {
-            deltaCounter = 1;
-            deltaDistance = distance - distanceOld;
-            distanceOld = distance;
-        }
-
-        //float dist = 0f;
         int layerMask = 1 << 11;
         RaycastHit hit;
+
         if (Physics.Raycast(ultrasonicSensor.transform.position, ultrasonicSensor.transform.forward, out hit, visibleDistance, layerMask))
         {
-            Debug.DrawRay(ultrasonicSensor.position, ultrasonicSensor.transform.forward * hit.distance, Color.red);
-            //dist = 1 - hit.distance / visibleDistance;
-            distance = hit.distance;
+            Debug.DrawRay(ultrasonicSensor.transform.position, ultrasonicSensor.transform.forward * hit.distance, Color.red);
+            distance = Mathf.Clamp(hit.distance / visibleDistance, 0, 1);
         }
-        
-        //distance = Mathf.Clamp(dist, 0, 1);
-        
-    }
-   
-    float Round(float x)
-    {
-        return (float)System.Math.Round(x, 2, System.MidpointRounding.AwayFromZero); ;
-    }
-  
+        else
+            distance = 0f;
+    }  
 }
