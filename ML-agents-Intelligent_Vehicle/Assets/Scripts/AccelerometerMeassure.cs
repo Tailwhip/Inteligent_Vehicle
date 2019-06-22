@@ -21,11 +21,10 @@ public class AccelerometerMeassure : MonoBehaviour
         /// Counting velocity X and Z
         velocityX = Mathf.Clamp((meassuredObj.velocity.x / velMax), -1, 1);
         velocityZ = Mathf.Clamp((meassuredObj.velocity.z / velMax), -1, 1);
+     
         /// Counting acceleration X and Z
-        /*
-        accelerationX = acceleration(velocityX);
-        accelerationZ = acceleration(velocityZ);
-        */    
+        accelerationX = acceleration(meassuredObj.velocity.x);
+        accelerationZ = acceleration(meassuredObj.velocity.z);
     }
 
     /// Function for counting acceleration
@@ -34,6 +33,6 @@ public class AccelerometerMeassure : MonoBehaviour
         float deltaTime = vel - lastVel;
         lastVel = vel;
 
-        return (vel / Time.fixedDeltaTime) / accMax;
+        return Mathf.Clamp((vel / Time.fixedDeltaTime) / accMax, -1, 1);
     }
 }

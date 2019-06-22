@@ -7,22 +7,6 @@ using System.IO;
 
 public class GoalAgent : Agent {
 
-    /// Objects:
-    private Rigidbody rb;
-    public GameObject wall;
-    public GameObject wall2;
-    public GameObject lightSource;
-
-    /// variables for reset the agent:
-    private Quaternion vehicleStartRot;
-    private Vector3 vehicleStartPos;
-    private Vector3 lightStartPos;
-    private float showReward = 0f;
-    private Vector3 wallStartPos;
-    private Quaternion wallStartRot;
-    private Vector3 wall2StartPos;
-    private Quaternion wall2StartRot;
-
     /// Ultrasonic sensors input
     public UltrasonicMeassure ultraSens1;
     public UltrasonicMeassure ultraSens2;
@@ -41,6 +25,30 @@ public class GoalAgent : Agent {
     List<float> velX = new List<float>();
     List<float> velZ = new List<float>();
 
+    /// Variables to count delta intensity:
+    private float deltaIntensity;
+    private float intensityOld = 0f;
+    private float intensity = 0f;
+    private int deltaCounter = 1;
+
+    /// Objects:
+    private Rigidbody rb;
+    public GameObject wall;
+    public GameObject wall2;
+    public GameObject wall3;
+    public GameObject lightSource;
+
+    /// variables for reset the agent:
+    private Vector3 vehicleStartPos;
+    private Quaternion vehicleStartRot;
+    private Vector3 lightStartPos;
+    private Vector3 wallStartPos;
+    private Quaternion wallStartRot;
+    private Vector3 wall2StartPos;
+    private Quaternion wall2StartRot;
+    private Vector3 wall3StartPos;
+    private Quaternion wall3StartRot;
+
     /// Variables for saving vector observation:
     List<float> US1dist = new List<float>();
     List<float> US2dist = new List<float>();
@@ -56,11 +64,6 @@ public class GoalAgent : Agent {
     List<float> Q1 = new List<float>();
     List<float> Q2 = new List<float>();
 
-    /// Variables to count delta intensity:
-    private float deltaIntensity;
-    private float intensityOld = 0f;
-    private float intensity = 0f;
-    private int deltaCounter = 1;
 
     public override void InitializeAgent()
     {
@@ -68,7 +71,6 @@ public class GoalAgent : Agent {
 
         /// initialise delta intensity variables:
         intensity = phototransistor1.intensity + phototransistor2.intensity + phototransistor3.intensity + phototransistor4.intensity;
-        intensityOld = 0.0f;
 
         /// initialise reset position variables:
         rb = this.GetComponent<Rigidbody>();
@@ -81,6 +83,9 @@ public class GoalAgent : Agent {
     
         wall2StartPos = wall2.transform.position;
         wall2StartRot = wall2.transform.rotation;
+
+        wall3StartPos = wall2.transform.position;
+        wall3StartRot = wall2.transform.rotation;
     }
 
     ///Reward conditions:
@@ -107,8 +112,8 @@ public class GoalAgent : Agent {
         AddVectorObs(ultraSens4.distance);
         AddVectorObs(ultraSens5.distance);
 
-        AddVectorObs(accelerometer.velocityX);
-        AddVectorObs(accelerometer.velocityZ);
+        AddVectorObs(accelerometer.accelerationX);
+        AddVectorObs(accelerometer.accelerationZ);
 
         AddVectorObs(phototransistor1.intensity);
         AddVectorObs(phototransistor2.intensity);
@@ -170,14 +175,29 @@ public class GoalAgent : Agent {
         Q2.Add(act[1]);
     }
 
+    public void SaveToFile(List<float> US1dist, List<float> US2dist, List<float> US3dist, List<float> US4dist, List<float> US5dist,
+    List<float> velX, List<float> velZ, List<float> intens1, List<float> intens2, List<float> intens3, List<float> intens4, List<float> Q1, List<float> Q2, string filename)
+    {
+        string data = "";
+        for (int i = 0; i < US1dist.Count; i++)
+        {
+            data += i + ";" + US1dist[i] + ";" + US2dist[i] + ";" + US3dist[i] + ";" + US4dist[i] + ";" + US5dist[i] + ";" + velX[i] + ";" + velZ[i] +
+                ";" + intens1[i] + ";" + intens2[i] + ";" + intens3[i] + ";" + intens4[i] + ";" + Q1[i] + ";" + Q2[i] + System.Environment.NewLine;
+        }
+        string path = Application.dataPath + "/" + filename + ".txt";
+        StreamWriter wf = File.CreateText(path);
+        wf.WriteLine(data);
+        wf.Close();
+        Debug.Log("SAVED");
+    }
+
     public override void AgentReset()
     {
         base.AgentReset();
-        showReward = GetCumulativeReward();
-        this.transform.position = vehicleStartPos + new Vector3(Random.Range(-20, 20), 0, (Random.Range(-5, 5)));
-        this.transform.rotation = vehicleStartRot;
         rb.velocity = new Vector3(0f, 0f, 0f);
         rb.angularVelocity = new Vector3(0f, 0f, 0f);
+        this.transform.position = vehicleStartPos + new Vector3(Random.Range(-20, 20), 0, (Random.Range(-5, 5)));
+        this.transform.rotation = vehicleStartRot;
         lightSource.transform.position = lightStartPos + new Vector3(Random.Range(-20, 20), 0, (Random.Range(-20, 10)));
         wall.transform.position = wallStartPos + new Vector3(Random.Range(-10, 10), 0, 0);
         wall.transform.Rotate(0f, Random.Range(-180, 180), 0f, 0);
@@ -185,7 +205,9 @@ public class GoalAgent : Agent {
         wall2.transform.position = wall2StartPos + new Vector3(Random.Range(-10, 10), 0, 0);
         wall2.transform.Rotate(0f, Random.Range(-180, 180), 0f, 0);
         wall2.transform.localScale = new Vector3(Random.Range(10, 25), 15, 5);
-        //deltaCounter = 20;
+        wall3.transform.position = wall2StartPos + new Vector3(Random.Range(-10, 10), 0, 0);
+        wall3.transform.Rotate(0f, Random.Range(-180, 180), 0f, 0);
+        wall3.transform.localScale = new Vector3(Random.Range(10, 25), 15, 5);
         intensityOld = 0.0f;
         /*
         //SaveToFile(US1dist, US2dist, US3dist, US4dist, US5dist, velX, velZ, intens1, intens2, intens3, intens4, Q1, Q2, "TestValues");
@@ -206,22 +228,6 @@ public class GoalAgent : Agent {
         */
     }
 
-    public void SaveToFile(List<float> US1dist, List<float> US2dist, List<float> US3dist, List<float> US4dist, List<float> US5dist,
-        List<float> velX, List<float> velZ, List<float> intens1, List<float> intens2, List<float> intens3, List<float> intens4, List<float> Q1, List<float> Q2, string filename)
-    {
-        string data = "";
-        for (int i = 0; i < US1dist.Count; i++)
-        {
-            data += i + ";" + US1dist[i] + ";" + US2dist[i] + ";" + US3dist[i] + ";" + US4dist[i] + ";" + US5dist[i] + ";" + velX[i] + ";" + velZ[i] +
-                ";" + intens1[i] + ";" + intens2[i] + ";" + intens3[i] + ";" + intens4[i] + ";" + Q1[i] + ";" + Q2[i] + System.Environment.NewLine;
-        }
-        string path = Application.dataPath + "/" + filename + ".txt";
-        StreamWriter wf = File.CreateText(path);
-        wf.WriteLine(data);
-        wf.Close();
-        Debug.Log("SAVED");
-    }
-
     // Showing ANN data:
     private void OnGUI()
     {
@@ -238,8 +244,8 @@ public class GoalAgent : Agent {
         GUI.Label(new Rect(25, 125, 250, 30), "US5: " + ultraSens5.distance);
 
         GUI.color = Color.yellow;
-        GUI.Label(new Rect(300, 25, 250, 30), "Velocity X: " + accelerometer.velocityX);
-        GUI.Label(new Rect(300, 50, 250, 30), "Velocity Z: " + accelerometer.velocityZ);
+        GUI.Label(new Rect(300, 25, 250, 30), "Velocity X: " + accelerometer.accelerationX);
+        GUI.Label(new Rect(300, 50, 250, 30), "Velocity Z: " + accelerometer.accelerationZ);
 
         GUI.color = Color.blue;
         GUI.Label(new Rect(150, 25, 250, 30), "PT1: " + phototransistor1.intensity);
