@@ -1,5 +1,6 @@
 ﻿using MLAgents;
 using System.Collections;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
@@ -49,21 +50,15 @@ public class GoalAgent : Agent {
     private Vector3 wall3StartPos;
     private Quaternion wall3StartRot;
 
-    /// Variables for saving vector observation:
-    List<float> US1dist = new List<float>();
-    List<float> US2dist = new List<float>();
-    List<float> US3dist = new List<float>();
-    List<float> US4dist = new List<float>();
-    List<float> US5dist = new List<float>();
-
-    List<float> intens1 = new List<float>();
-    List<float> intens2 = new List<float>();
-    List<float> intens3 = new List<float>();
-    List<float> intens4 = new List<float>();
-
-    List<float> Q1 = new List<float>();
-    List<float> Q2 = new List<float>();
-
+    /// Variables for creating a training dataset for Pi_Intelligent_Vehicle
+    public bool saveTrainSet = false;
+    private List<float> vectorActions = new List<float>();
+    ///float episode_returns = 0;
+    ///float reward = 0;
+    private List<float> vectorObs = new List<float>();
+    private int episodeStarts = 0;
+    private int episodeStartsCounter = 999;
+    
 
     public override void InitializeAgent()
     {
@@ -84,22 +79,27 @@ public class GoalAgent : Agent {
         wall2StartPos = wall2.transform.position;
         wall2StartRot = wall2.transform.rotation;
 
-        wall3StartPos = wall2.transform.position;
-        wall3StartRot = wall2.transform.rotation;
+        wall3StartPos = wall3.transform.position;
+        wall3StartRot = wall3.transform.rotation;
+
+        episodeStarts = 0;
+        episodeStartsCounter = 999;
     }
 
-    ///Reward conditions:
+    /// Reward conditions:
     private void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.tag == "Obstacle")
         {
             AddReward(-1.0f);
+            episodeStarts = 1;
             Done();
         }
 
         if (collision.gameObject.tag == "ResetPlane")
         {
             AgentReset();
+            episodeStarts = 1;
         }
     }
 
@@ -121,20 +121,19 @@ public class GoalAgent : Agent {
         AddVectorObs(phototransistor4.intensity);
 
         intensity = phototransistor1.intensity + phototransistor2.intensity + phototransistor3.intensity + phototransistor4.intensity;
-        /*
+
         /// for saving vector observation:
-        US1dist.Add(US1distance);
-        US2dist.Add(US2distance);
-        US3dist.Add(US3distance);
-        US4dist.Add(US4distance);
-        US5dist.Add(US5distance);
-        velX.Add(rb.velocity.x / velMax);
-        velZ.Add(rb.velocity.z / velMax);
-        intens1.Add(phototransistor1.intensity);
-        intens2.Add(phototransistor2.intensity);
-        intens3.Add(phototransistor3.intensity);
-        intens4.Add(phototransistor4.intensity);
-        */
+        vectorObs.Add(ultraSens1.distance);
+        vectorObs.Add(ultraSens2.distance);
+        vectorObs.Add(ultraSens3.distance);
+        vectorObs.Add(ultraSens4.distance);
+        vectorObs.Add(ultraSens5.distance);
+        vectorObs.Add(accelerometer.accelerationX);
+        vectorObs.Add(accelerometer.accelerationZ);
+        vectorObs.Add(phototransistor1.intensity);
+        vectorObs.Add(phototransistor2.intensity);
+        vectorObs.Add(phototransistor3.intensity);
+        vectorObs.Add(phototransistor4.intensity);
     }
 
     /// Moving agent with outputs:
@@ -148,7 +147,7 @@ public class GoalAgent : Agent {
         {
             deltaCounter = 1;
             deltaIntensity =  intensity - intensityOld;
-            if (deltaIntensity <= 0.01f)
+            if (deltaIntensity <= 0.001f)
             {
                 AddReward(-0.005f);
             }
@@ -160,35 +159,36 @@ public class GoalAgent : Agent {
         }
         
         /// for delta distance input: 
-        if (intensity > 3.5f)
+        if (intensity > 1.7f)
         {
             SetReward(1f);
+            episodeStarts = 1;
             Done();
         }
 
-        ///add position and rotation:
-        rb.AddForce(this.transform.forward * Mathf.Clamp(act[0], -1f, 1f) * 300f);
+        /// add position and rotation:
+        rb.AddForce(this.transform.forward * Mathf.Clamp(act[0], 0f, 1f) * 1500f);
         this.transform.Rotate(0, Mathf.Clamp(act[1], -1f, 1f) * 2f, 0, 0);
 
-        ///for saving vector observations:
-        Q1.Add(act[0]);
-        Q2.Add(act[1]);
-    }
-
-    public void SaveToFile(List<float> US1dist, List<float> US2dist, List<float> US3dist, List<float> US4dist, List<float> US5dist,
-    List<float> velX, List<float> velZ, List<float> intens1, List<float> intens2, List<float> intens3, List<float> intens4, List<float> Q1, List<float> Q2, string filename)
-    {
-        string data = "";
-        for (int i = 0; i < US1dist.Count; i++)
+        /// for saving vector observations:
+        if (saveTrainSet)
         {
-            data += i + ";" + US1dist[i] + ";" + US2dist[i] + ";" + US3dist[i] + ";" + US4dist[i] + ";" + US5dist[i] + ";" + velX[i] + ";" + velZ[i] +
-                ";" + intens1[i] + ";" + intens2[i] + ";" + intens3[i] + ";" + intens4[i] + ";" + Q1[i] + ";" + Q2[i] + System.Environment.NewLine;
+            vectorActions.Add(act[0]);
+            vectorActions.Add(act[1]);
+
+            episodeStartsCounter--;
+            if (episodeStartsCounter == 0)
+            {
+                episodeStartsCounter = 999;
+                episodeStarts = 1;
+            }
+            Debug.Log(episodeStarts);
+            SaveToFile(vectorActions, GetCumulativeReward(), GetReward(), vectorObs, episodeStarts);
+
+            vectorActions.Clear();
+            vectorObs.Clear();
+            episodeStarts = 0;
         }
-        string path = Application.dataPath + "/" + filename + ".txt";
-        StreamWriter wf = File.CreateText(path);
-        wf.WriteLine(data);
-        wf.Close();
-        Debug.Log("SAVED");
     }
 
     public override void AgentReset()
@@ -196,39 +196,22 @@ public class GoalAgent : Agent {
         base.AgentReset();
         rb.velocity = new Vector3(0f, 0f, 0f);
         rb.angularVelocity = new Vector3(0f, 0f, 0f);
-        this.transform.position = vehicleStartPos + new Vector3(Random.Range(-20, 20), 0, (Random.Range(-5, 5)));
+        this.transform.position = vehicleStartPos + new Vector3(UnityEngine.Random.Range(-20, 20), 0, (UnityEngine.Random.Range(-5, 5)));
         this.transform.rotation = vehicleStartRot;
-        lightSource.transform.position = lightStartPos + new Vector3(Random.Range(-20, 20), 0, (Random.Range(-20, 10)));
-        wall.transform.position = wallStartPos + new Vector3(Random.Range(-10, 10), 0, 0);
-        wall.transform.Rotate(0f, Random.Range(-180, 180), 0f, 0);
-        wall.transform.localScale = new Vector3(Random.Range(10, 25), 15, 5);
-        wall2.transform.position = wall2StartPos + new Vector3(Random.Range(-10, 10), 0, 0);
-        wall2.transform.Rotate(0f, Random.Range(-180, 180), 0f, 0);
-        wall2.transform.localScale = new Vector3(Random.Range(10, 25), 15, 5);
-        wall3.transform.position = wall2StartPos + new Vector3(Random.Range(-10, 10), 0, 0);
-        wall3.transform.Rotate(0f, Random.Range(-180, 180), 0f, 0);
-        wall3.transform.localScale = new Vector3(Random.Range(10, 25), 15, 5);
+        lightSource.transform.position = lightStartPos + new Vector3(UnityEngine.Random.Range(-200, 200), 0, (UnityEngine.Random.Range(-20, 10)));
+        wall.transform.position = wallStartPos + new Vector3(UnityEngine.Random.Range(-50, 50), 0, 0);
+        wall.transform.Rotate(0f, UnityEngine.Random.Range(-180, 180), 0f, 0);
+        wall.transform.localScale = new Vector3(UnityEngine.Random.Range(100, 200), 100, 50);
+        wall2.transform.position = wall2StartPos + new Vector3(UnityEngine.Random.Range(-5, 5), 0, 0);
+        wall2.transform.Rotate(0f, UnityEngine.Random.Range(-180, 180), 0f, 0);
+        wall2.transform.localScale = new Vector3(UnityEngine.Random.Range(10, 25), 15, 5);
+        wall3.transform.position = wall3StartPos + new Vector3(UnityEngine.Random.Range(-5, 5), 0, 0);
+        wall3.transform.Rotate(0f, UnityEngine.Random.Range(-180, 180), 0f, 0);
+        wall3.transform.localScale = new Vector3(UnityEngine.Random.Range(10, 25), 15, 5);
         intensityOld = 0.0f;
-        /*
-        //SaveToFile(US1dist, US2dist, US3dist, US4dist, US5dist, velX, velZ, intens1, intens2, intens3, intens4, Q1, Q2, "TestValues");
-
-        US1dist.Clear();
-        US2dist.Clear();
-        US3dist.Clear();
-        US4dist.Clear();
-        US5dist.Clear();
-        velX.Clear();
-        velZ.Clear();
-        intens1.Clear();
-        intens2.Clear();
-        intens3.Clear();
-        intens4.Clear();
-        Q1.Clear();
-        Q2.Clear();
-        */
     }
 
-    // Showing ANN data:
+    /// Showing ANN data:
     private void OnGUI()
     {
         //myGUI();
@@ -244,8 +227,8 @@ public class GoalAgent : Agent {
         GUI.Label(new Rect(25, 125, 250, 30), "US5: " + ultraSens5.distance);
 
         GUI.color = Color.yellow;
-        GUI.Label(new Rect(300, 25, 250, 30), "Velocity X: " + accelerometer.accelerationX);
-        GUI.Label(new Rect(300, 50, 250, 30), "Velocity Z: " + accelerometer.accelerationZ);
+        GUI.Label(new Rect(300, 25, 250, 30), "Acceleration X: " + accelerometer.accelerationX);
+        GUI.Label(new Rect(300, 50, 250, 30), "Acceleration Z: " + accelerometer.accelerationZ);
 
         GUI.color = Color.blue;
         GUI.Label(new Rect(150, 25, 250, 30), "PT1: " + phototransistor1.intensity);
@@ -256,5 +239,58 @@ public class GoalAgent : Agent {
         GUI.color = Color.green;
         GUI.Label(new Rect(500, 25, 250, 30), "delta intensity: " + deltaIntensity);
         GUI.Label(new Rect(500, 50, 250, 30), "Intensity: " + intensity);
+    }
+
+    public void SaveToFile(List<float> actions, float episode_returns, float reward, 
+        List<float> obs, int episode_starts)
+    {
+        /// a dataset buffer
+        string data = "";
+
+        data += "a";
+        /// adding actions to dataset buffer
+        for (int i = 0; i < actions.Count; i++)
+        {
+            data += actions[i] + ";" ;
+        }
+        /// delete last "; "
+        // data = data.Remove(data.Length - 1, 1);
+        // data = data.Remove(data.Length - 1, 1);
+        data += ">";
+
+        /// adding episode_return and reward value to the dataset buffer
+        data += "e" + episode_returns + ";>r" + reward + ";>" ;
+
+        data += "o";
+        /// adding observations to the dataset buffer
+        for (int i = 0; i < obs.Count; i++)
+        {
+            data += obs[i] + ";";
+        }
+        /// delete last "; "
+        // data = data.Remove(data.Length - 1, 1);
+        // data = data.Remove(data.Length - 1, 1);
+        data += ">";
+
+        /// adding episode_starts to the dataset buffer
+        data += "t" + episode_starts + ";>";
+
+        /// adding a new line of dataset
+        // data += System.Environment.NewLine;
+
+        string path = @"E:/Zajecia/Projekty/14-Inteligentny_pojazd/03-Oprogramowanie/Pi_Intelligent_vehicle/expert_intelligent_vehicle.txt";
+
+        /// rewriting dataset buffer as a new line of data to the text file
+        if (!File.Exists(path))
+        {
+            StreamWriter wf = File.CreateText(path);
+            wf.WriteLine(data);
+            wf.Close();
+        }
+        using (StreamWriter sw = File.AppendText(path))
+        {
+            sw.WriteLine(data);
+            sw.Close();
+        }
     }
 }

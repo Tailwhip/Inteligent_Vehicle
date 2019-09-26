@@ -5,9 +5,8 @@ using UnityEngine;
 public class AccelerometerMeassure : MonoBehaviour
 {
     public Rigidbody meassuredObj;
-    private float velMax = 39f;
-    private float accMax = 2400f;
-    private float lastVel = 0.0f;
+    private float velMax = 1f; // 39f;
+    private float accMax = 1984.05f; // 2400f;
 
     public float velocityX = 0f;
     public float velocityZ = 0f;
@@ -19,8 +18,8 @@ public class AccelerometerMeassure : MonoBehaviour
     void FixedUpdate()
     {
         /// Counting velocity X and Z
-        velocityX = Mathf.Clamp((meassuredObj.velocity.x / velMax), -1, 1);
-        velocityZ = Mathf.Clamp((meassuredObj.velocity.z / velMax), -1, 1);
+        velocityX = Mathf.Clamp(1 - (meassuredObj.velocity.x / velMax), 0, 1);
+        velocityZ = Mathf.Clamp(1 - (meassuredObj.velocity.z / velMax), 0, 1);
      
         /// Counting acceleration X and Z
         accelerationX = acceleration(meassuredObj.velocity.x);
@@ -30,9 +29,6 @@ public class AccelerometerMeassure : MonoBehaviour
     /// Function for counting acceleration
     private float acceleration(float vel)
     {
-        float deltaTime = vel - lastVel;
-        lastVel = vel;
-
-        return Mathf.Clamp((vel / Time.fixedDeltaTime) / accMax, -1, 1);
+        return Mathf.Clamp((vel / Time.fixedDeltaTime + accMax) / (2*accMax), 0, 1);
     }
 }

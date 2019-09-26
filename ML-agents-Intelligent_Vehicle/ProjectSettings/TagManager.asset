@@ -4,11 +4,31 @@
 TagManager:
   serializedVersion: 2
   tags:
+  - agent
+  - iWall
+  - banana
+  - wall
+  - badBanana
+  - pit
+  - frozenAgent
+  - ball
+  - redGoal
+  - blueGoal
+  - blueAgent
+  - redAgent
+  - redBlock
+  - goal
+  - ground
+  - orangeBlock
+  - block
+  - orangeGoal
+  - switchOff
+  - pyramid
+  - switchOn
+  - stone
+  - ResetPlane
   - Obstacle
   - Win
-  - ResetPlane
-  - dead
-  - goal
   layers:
   - Default
   - TransparentFX
@@ -18,13 +38,13 @@ TagManager:
   - UI
   - 
   - 
-  - PostProcessing
-  - Ultrasonic
-  - Floor
-  - Obstacle
-  - Vehicle
-  - Phototransistor
-  - ResetPlane
+  - invisible
+  - ball
+  - goalieWall
+  - goalie
+  - strikerWall
+  - striker
+  - obstacle
   - 
   - 
   - 
