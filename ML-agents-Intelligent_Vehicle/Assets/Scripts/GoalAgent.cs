@@ -20,14 +20,14 @@ public class GoalAgent : Agent {
     public PhototransistorMeassure phototransistor2;
     public PhototransistorMeassure phototransistor3;
     public PhototransistorMeassure phototransistor4;
-    
+
     /// Velocity input
     public AccelerometerMeassure accelerometer;
     List<float> velX = new List<float>();
     List<float> velZ = new List<float>();
 
     /// Variables to count delta intensity:
-    private float deltaIntensity;
+    private float deltaIntensity = 0f;
     private float intensityOld = 0f;
     private float intensity = 0f;
     private int deltaCounter = 1;
@@ -58,14 +58,14 @@ public class GoalAgent : Agent {
     private List<float> vectorObs = new List<float>();
     private int episodeStarts = 0;
     private int episodeStartsCounter = 999;
-    
+
 
     public override void InitializeAgent()
     {
         base.InitializeAgent();
 
         /// initialise delta intensity variables:
-        intensity = phototransistor1.intensity + phototransistor2.intensity + phototransistor3.intensity + phototransistor4.intensity;
+        intensity = (phototransistor1.intensity + phototransistor2.intensity + phototransistor3.intensity + phototransistor4.intensity);
 
         /// initialise reset position variables:
         rb = this.GetComponent<Rigidbody>();
@@ -75,7 +75,7 @@ public class GoalAgent : Agent {
 
         wallStartPos = wall.transform.position;
         wallStartRot = wall.transform.rotation;
-    
+
         wall2StartPos = wall2.transform.position;
         wall2StartRot = wall2.transform.rotation;
 
@@ -120,7 +120,7 @@ public class GoalAgent : Agent {
         AddVectorObs(phototransistor3.intensity);
         AddVectorObs(phototransistor4.intensity);
 
-        intensity = phototransistor1.intensity + phototransistor2.intensity + phototransistor3.intensity + phototransistor4.intensity;
+        intensity = (phototransistor1.intensity + phototransistor2.intensity + phototransistor3.intensity + phototransistor4.intensity);
 
         /// for saving vector observation:
         vectorObs.Add(ultraSens1.distance);
@@ -140,26 +140,26 @@ public class GoalAgent : Agent {
     public override void AgentAction(float[] act, string textAction)
     {
         base.AgentAction(act, textAction);
-                       
+
         /// counting delta intensity and use it to punish or reward:
         deltaCounter--;
         if (deltaCounter == 0)
         {
             deltaCounter = 1;
-            deltaIntensity =  intensity - intensityOld;
-            if (deltaIntensity <= 0.001f)
+            deltaIntensity = intensity - intensityOld;
+            if (deltaIntensity <= 0.01f)
             {
                 AddReward(-0.005f);
             }
             else
             {
-                AddReward(0.005f);
+                AddReward(0.003f);
             }
             intensityOld = intensity;
         }
-        
+
         /// for delta distance input: 
-        if (intensity > 1.7f)
+        if (intensity > 3.5f)
         {
             SetReward(1f);
             episodeStarts = 1;
@@ -167,7 +167,7 @@ public class GoalAgent : Agent {
         }
 
         /// add position and rotation:
-        rb.AddForce(this.transform.forward * Mathf.Clamp(act[0], 0f, 1f) * 1500f);
+        rb.AddForce(this.transform.forward * Mathf.Clamp(act[0], -1f, 1f) * 1500f);
         this.transform.Rotate(0, Mathf.Clamp(act[1], -1f, 1f) * 2f, 0, 0);
 
         /// for saving vector observations:
@@ -199,16 +199,17 @@ public class GoalAgent : Agent {
         this.transform.position = vehicleStartPos + new Vector3(UnityEngine.Random.Range(-20, 20), 0, (UnityEngine.Random.Range(-5, 5)));
         this.transform.rotation = vehicleStartRot;
         lightSource.transform.position = lightStartPos + new Vector3(UnityEngine.Random.Range(-200, 200), 0, (UnityEngine.Random.Range(-20, 10)));
-        wall.transform.position = wallStartPos + new Vector3(UnityEngine.Random.Range(-50, 50), 0, 0);
-        wall.transform.Rotate(0f, UnityEngine.Random.Range(-180, 180), 0f, 0);
-        wall.transform.localScale = new Vector3(UnityEngine.Random.Range(100, 200), 100, 50);
-        wall2.transform.position = wall2StartPos + new Vector3(UnityEngine.Random.Range(-5, 5), 0, 0);
-        wall2.transform.Rotate(0f, UnityEngine.Random.Range(-180, 180), 0f, 0);
-        wall2.transform.localScale = new Vector3(UnityEngine.Random.Range(10, 25), 15, 5);
-        wall3.transform.position = wall3StartPos + new Vector3(UnityEngine.Random.Range(-5, 5), 0, 0);
-        wall3.transform.Rotate(0f, UnityEngine.Random.Range(-180, 180), 0f, 0);
-        wall3.transform.localScale = new Vector3(UnityEngine.Random.Range(10, 25), 15, 5);
+        wallRandomPos(wall, wallStartPos);
+        wallRandomPos(wall2, wall2StartPos);
+        //wallRandomPos(wall3, wall3StartPos);
         intensityOld = 0.0f;
+    }
+
+    private void wallRandomPos(GameObject _wall, Vector3 _wallStartPos)
+    {
+        _wall.transform.position = _wallStartPos + new Vector3(UnityEngine.Random.Range(-50, 50), 0, 0);
+        _wall.transform.Rotate(0f, UnityEngine.Random.Range(-180, 180), 0f, 0);
+        _wall.transform.localScale = new Vector3(UnityEngine.Random.Range(50, 100), 100, 50);
     }
 
     /// Showing ANN data:
@@ -278,7 +279,7 @@ public class GoalAgent : Agent {
         /// adding a new line of dataset
         // data += System.Environment.NewLine;
 
-        string path = @"E:/Zajecia/Projekty/14-Inteligentny_pojazd/03-Oprogramowanie/Pi_Intelligent_vehicle/expert_intelligent_vehicle.txt";
+        string path = @"D:/ML-agents-Intelligent_Vehicle/expert_intelligent_vehicle.txt";
 
         /// rewriting dataset buffer as a new line of data to the text file
         if (!File.Exists(path))

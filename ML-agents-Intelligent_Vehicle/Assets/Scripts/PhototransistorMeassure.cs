@@ -21,7 +21,7 @@ public class PhototransistorMeassure : MonoBehaviour
         //intensity = Mathf.Clamp(1 - (intensVect.magnitude / intesityMax), 0, 1);
 
         distance = intensVect.magnitude;
-        Debug.Log("distance: " + distance);
+        //Debug.Log("distance: " + distance);
 
         angleXY = Mathf.Atan((lightSource.transform.position.x - this.transform.position.x) / lightSource.transform.position.y) * Mathf.Rad2Deg;
         angleYZ = Mathf.Atan((lightSource.transform.position.y - this.transform.position.y) / lightSource.transform.position.y) * Mathf.Rad2Deg; ;
@@ -37,9 +37,19 @@ public class PhototransistorMeassure : MonoBehaviour
     {
         if (_distance > 201)
         {
-            return (Mathf.Pow(0.993f, _distance + 120)) + 0.00354f;
+            //Debug.Log("Wychodzi: " + (Mathf.Log(Mathf.Pow(0.993f, _distance + 120f) + 0.00354f, 110f) + 1.178796054f));
+            //Debug.Log("Czujnik: " + (Mathf.Pow(0.993f, _distance + 120) + 0.00354f));
+            return (Mathf.Log(Mathf.Pow(0.993f, _distance + 120f) + 0.00354f, 110f) + 1.178796054f);
+            //Mathf.Pow(0.993f, _distance + 120) + 0.00354f;
         }
-        else return (Mathf.Pow(0.981f, _distance - 11)) + 0.085f;
+
+        else
+        {
+            //Debug.Log("Wychodzi: " + (Mathf.Log((Mathf.Pow(0.981f, _distance - 11f)) + 0.085f, 110f) + 1.178796054f));
+            //Debug.Log("Czujnik: " + Mathf.Pow(0.981f, _distance - 11) + 0.085f);
+            return (Mathf.Log((Mathf.Pow(0.981f, _distance - 11f)) + 0.085f, 110f) + 1.178796054f);
+            //Mathf.Pow(0.981f, _distance - 11) + 0.085f;
+        }
     }
 
     float angleRatio(float _angleXY, float _angleYZ)
