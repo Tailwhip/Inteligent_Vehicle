@@ -22,13 +22,18 @@ public class AccelerometerMeassure : MonoBehaviour
         velocityZ = Mathf.Clamp(1 - (meassuredObj.velocity.z / velMax), 0, 1);
      
         /// Counting acceleration X and Z
-        accelerationX = acceleration(meassuredObj.velocity.x);
-        accelerationZ = acceleration(meassuredObj.velocity.z);
+        accelerationX = Round(acceleration(meassuredObj.velocity.x));
+        accelerationZ = Round(acceleration(meassuredObj.velocity.z));
     }
 
     /// Function for counting acceleration
     private float acceleration(float vel)
     {
         return Mathf.Clamp((vel / Time.fixedDeltaTime + accMax) / (2*accMax), 0, 1);
+    }
+
+    float Round(float x)
+    {
+        return (float)System.Math.Round(x, 2);
     }
 }

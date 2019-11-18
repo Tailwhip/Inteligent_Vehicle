@@ -58,7 +58,8 @@ public class GoalAgent : Agent {
     private List<float> vectorObs = new List<float>();
     private int episodeStarts = 0;
     private int episodeStartsCounter = 999;
-
+    private int turning = 10;
+    private int turnFlag = 0;
 
     public override void InitializeAgent()
     {
@@ -112,8 +113,8 @@ public class GoalAgent : Agent {
         AddVectorObs(ultraSens4.distance);
         AddVectorObs(ultraSens5.distance);
 
-        AddVectorObs(accelerometer.accelerationX);
-        AddVectorObs(accelerometer.accelerationZ);
+        //AddVectorObs(accelerometer.accelerationX);
+        //AddVectorObs(accelerometer.accelerationZ);
 
         AddVectorObs(phototransistor1.intensity);
         AddVectorObs(phototransistor2.intensity);
@@ -128,8 +129,8 @@ public class GoalAgent : Agent {
         vectorObs.Add(ultraSens3.distance);
         vectorObs.Add(ultraSens4.distance);
         vectorObs.Add(ultraSens5.distance);
-        vectorObs.Add(accelerometer.accelerationX);
-        vectorObs.Add(accelerometer.accelerationZ);
+        //vectorObs.Add(accelerometer.accelerationX);
+        //vectorObs.Add(accelerometer.accelerationZ);
         vectorObs.Add(phototransistor1.intensity);
         vectorObs.Add(phototransistor2.intensity);
         vectorObs.Add(phototransistor3.intensity);
@@ -166,9 +167,20 @@ public class GoalAgent : Agent {
             Done();
         }
 
+        /*
+        /// For calibrating simulation with the real model:
+        turning--;
+        if (turning == 0)
+        {
+            //this.transform.Rotate(0, 5f, 0, 0);
+            rb.AddForce(this.transform.forward * 2130f);
+            turning = 100;
+            turnFlag++;
+        }
+        */
         /// add position and rotation:
-        rb.AddForce(this.transform.forward * Mathf.Clamp(act[0], -1f, 1f) * 1500f);
-        this.transform.Rotate(0, Mathf.Clamp(act[1], -1f, 1f) * 2f, 0, 0);
+        rb.AddForce(this.transform.forward * Mathf.Clamp(act[0], -1f, 1f) * 2130f);
+        this.transform.Rotate(0, Mathf.Clamp(act[1], -1f, 1f) * 5f, 0, 0);
 
         /// for saving vector observations:
         if (saveTrainSet)
@@ -200,7 +212,7 @@ public class GoalAgent : Agent {
         this.transform.rotation = vehicleStartRot;
         lightSource.transform.position = lightStartPos + new Vector3(UnityEngine.Random.Range(-200, 200), 0, (UnityEngine.Random.Range(-20, 10)));
         wallRandomPos(wall, wallStartPos);
-        wallRandomPos(wall2, wall2StartPos);
+        //wallRandomPos(wall2, wall2StartPos);
         //wallRandomPos(wall3, wall3StartPos);
         intensityOld = 0.0f;
     }
@@ -240,6 +252,7 @@ public class GoalAgent : Agent {
         GUI.color = Color.green;
         GUI.Label(new Rect(500, 25, 250, 30), "delta intensity: " + deltaIntensity);
         GUI.Label(new Rect(500, 50, 250, 30), "Intensity: " + intensity);
+        GUI.Label(new Rect(500, 75, 250, 30), "Turn: " + turnFlag);
     }
 
     public void SaveToFile(List<float> actions, float episode_returns, float reward, 

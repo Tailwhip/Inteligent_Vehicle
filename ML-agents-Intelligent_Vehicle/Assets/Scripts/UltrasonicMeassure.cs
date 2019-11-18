@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class UltrasonicMeassure : MonoBehaviour {
 
-    private float visibleDistance = 400f;
+    private float visibleDistance = 510f;
     public float distance = 0f;
     public Transform ultrasonicSensor;
     
@@ -16,9 +16,15 @@ public class UltrasonicMeassure : MonoBehaviour {
         if (Physics.Raycast(ultrasonicSensor.transform.position, ultrasonicSensor.transform.forward, out hit, visibleDistance, layerMask))
         {
             Debug.DrawRay(ultrasonicSensor.transform.position, ultrasonicSensor.transform.forward * hit.distance, Color.red);
-            distance = Mathf.Clamp(1 - hit.distance / visibleDistance, 0, 1);
+            distance = Round(Mathf.Clamp(1 - hit.distance / visibleDistance, 0, 1));
         }
         else
             distance = 0f;
-    }  
+    }
+
+    float Round(float x)
+    {
+        return (float)System.Math.Round(x, 2);
+    }
+
 }

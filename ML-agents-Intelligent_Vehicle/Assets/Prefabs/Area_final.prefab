@@ -193,7 +193,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &4122923916929334
 Transform:
   m_ObjectHideFlags: 0
@@ -293,7 +293,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1888813056383516}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -176, y: 57, z: -7}
+  m_LocalPosition: {x: 2, y: 57, z: -7}
   m_LocalScale: {x: 100, y: 100, z: 50}
   m_Children: []
   m_Father: {fileID: 4585412871207158}
@@ -746,6 +746,11 @@ PrefabInstance:
       propertyPath: saveTrainSet
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 7014078014135098145, guid: dcdb85d9995e33c43997508bc303d8b5,
+        type: 3}
+      propertyPath: agentParameters.maxStep
+      value: 1000
+      objectReference: {fileID: 0}
     - target: {fileID: 4047654963546523430, guid: dcdb85d9995e33c43997508bc303d8b5,
         type: 3}
       propertyPath: lightSource
@@ -842,7 +847,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4658083694743582, guid: f9ef2db45234400439453ab43a371509, type: 3}
       propertyPath: m_LocalScale.x
-      value: 0.95
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4658083694743582, guid: f9ef2db45234400439453ab43a371509, type: 3}
       propertyPath: m_LocalScale.y
@@ -850,7 +855,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4658083694743582, guid: f9ef2db45234400439453ab43a371509, type: 3}
       propertyPath: m_LocalScale.z
-      value: 0.95
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 23008644894280916, guid: f9ef2db45234400439453ab43a371509,
         type: 3}

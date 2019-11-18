@@ -24,11 +24,11 @@ public class PhototransistorMeassure : MonoBehaviour
         //Debug.Log("distance: " + distance);
 
         angleXY = Mathf.Atan((lightSource.transform.position.x - this.transform.position.x) / lightSource.transform.position.y) * Mathf.Rad2Deg;
-        angleYZ = Mathf.Atan((lightSource.transform.position.y - this.transform.position.y) / lightSource.transform.position.y) * Mathf.Rad2Deg; ;
+        angleYZ = Mathf.Atan((lightSource.transform.position.y - this.transform.position.y) / lightSource.transform.position.y) * Mathf.Rad2Deg;
                  
         /// intensity is a real BH1750 sensor value obtained from sensor characteristic multiplied 
         /// by ratio of angle deviation from an axis given from the datasheet
-        intensity = Mathf.Clamp((axisValue(distance) * angleRatio(angleXY, angleYZ)), 0, 1);
+        intensity = Round(Mathf.Clamp((Mathf.Log((axisValue(distance) * angleRatio(angleXY, angleYZ)), 110f) + 1.178796054f), 0f, 1f));
                 
         //intensity = Mathf.Clamp(1 - (intensVect.magnitude / intesityMax), 0, 1);
     }
@@ -39,7 +39,7 @@ public class PhototransistorMeassure : MonoBehaviour
         {
             //Debug.Log("Wychodzi: " + (Mathf.Log(Mathf.Pow(0.993f, _distance + 120f) + 0.00354f, 110f) + 1.178796054f));
             //Debug.Log("Czujnik: " + (Mathf.Pow(0.993f, _distance + 120) + 0.00354f));
-            return (Mathf.Log(Mathf.Pow(0.993f, _distance + 120f) + 0.00354f, 110f) + 1.178796054f);
+            return Mathf.Pow(0.993f, _distance + 120f) + 0.00354f;
             //Mathf.Pow(0.993f, _distance + 120) + 0.00354f;
         }
 
@@ -47,7 +47,7 @@ public class PhototransistorMeassure : MonoBehaviour
         {
             //Debug.Log("Wychodzi: " + (Mathf.Log((Mathf.Pow(0.981f, _distance - 11f)) + 0.085f, 110f) + 1.178796054f));
             //Debug.Log("Czujnik: " + Mathf.Pow(0.981f, _distance - 11) + 0.085f);
-            return (Mathf.Log((Mathf.Pow(0.981f, _distance - 11f)) + 0.085f, 110f) + 1.178796054f);
+            return Mathf.Pow(0.981f, _distance - 11f) + 0.085f;
             //Mathf.Pow(0.981f, _distance - 11) + 0.085f;
         }
     }
@@ -61,5 +61,10 @@ public class PhototransistorMeassure : MonoBehaviour
         //float x2 = (Mathf.Pow(_angleXY, 2f) * (-0.000123f) + 1f);
         //return (x1 + x2) / 2;
         return x1;
+    }
+
+    float Round(float x)
+    {
+        return (float)System.Math.Round(x, 2);
     }
 }
