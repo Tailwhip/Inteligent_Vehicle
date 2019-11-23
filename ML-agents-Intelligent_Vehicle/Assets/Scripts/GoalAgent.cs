@@ -1,6 +1,7 @@
 ﻿using MLAgents;
 using System.Collections;
 using System;
+using System.Diagnostics;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
@@ -60,6 +61,8 @@ public class GoalAgent : Agent {
     private int episodeStartsCounter = 999;
     private int turning = 10;
     private int turnFlag = 0;
+
+    private Stopwatch stopwatch = new Stopwatch();
 
     public override void InitializeAgent()
     {
@@ -154,7 +157,7 @@ public class GoalAgent : Agent {
             }
             else
             {
-                AddReward(0.003f);
+                AddReward(0.002f);
             }
             intensityOld = intensity;
         }
@@ -173,14 +176,22 @@ public class GoalAgent : Agent {
         if (turning == 0)
         {
             //this.transform.Rotate(0, 5f, 0, 0);
-            rb.AddForce(this.transform.forward * 2130f);
+            //rb.AddForce(this.transform.forward * 2130f);
+            move(0f, 1f);
             turning = 100;
             turnFlag++;
         }
         */
+
         /// add position and rotation:
-        rb.AddForce(this.transform.forward * Mathf.Clamp(act[0], -1f, 1f) * 2130f);
-        this.transform.Rotate(0, Mathf.Clamp(act[1], -1f, 1f) * 5f, 0, 0);
+        //stopwatch.Start();
+        move(act[0], act[1]);
+        //stopwatch.Stop();
+        //UnityEngine.Debug.Log("ELAPSED TIME: " + stopwatch.Elapsed);
+        //stopwatch.Reset();
+
+        //rb.AddForce(this.transform.forward * Mathf.Clamp(act[0], -1f, 1f) * 2130f);
+        //this.transform.Rotate(0, Mathf.Clamp(act[1], -1f, 1f) * 5f, 0, 0);
 
         /// for saving vector observations:
         if (saveTrainSet)
@@ -194,7 +205,7 @@ public class GoalAgent : Agent {
                 episodeStartsCounter = 999;
                 episodeStarts = 1;
             }
-            Debug.Log(episodeStarts);
+            UnityEngine.Debug.Log(episodeStarts);
             SaveToFile(vectorActions, GetCumulativeReward(), GetReward(), vectorObs, episodeStarts);
 
             vectorActions.Clear();
@@ -208,20 +219,27 @@ public class GoalAgent : Agent {
         base.AgentReset();
         rb.velocity = new Vector3(0f, 0f, 0f);
         rb.angularVelocity = new Vector3(0f, 0f, 0f);
-        this.transform.position = vehicleStartPos + new Vector3(UnityEngine.Random.Range(-20, 20), 0, (UnityEngine.Random.Range(-5, 5)));
+        this.transform.position = vehicleStartPos + new Vector3(UnityEngine.Random.Range(-200, 200), 0, (UnityEngine.Random.Range(-50, 50)));
         this.transform.rotation = vehicleStartRot;
+        this.transform.Rotate(0f, UnityEngine.Random.Range(-120f, 120f), 0f, 0f);
         lightSource.transform.position = lightStartPos + new Vector3(UnityEngine.Random.Range(-200, 200), 0, (UnityEngine.Random.Range(-20, 10)));
         wallRandomPos(wall, wallStartPos);
-        //wallRandomPos(wall2, wall2StartPos);
+        wallRandomPos(wall2, wall2StartPos);
         //wallRandomPos(wall3, wall3StartPos);
         intensityOld = 0.0f;
     }
 
+    void move(float act0, float act1)
+    {
+        rb.AddForce(this.transform.forward * Mathf.Clamp(act0, -1f, 1f) * 10300f);
+        this.transform.Rotate(0, Mathf.Clamp(act1, -1f, 1f) * 15f, 0, 0);
+    }
+
     private void wallRandomPos(GameObject _wall, Vector3 _wallStartPos)
     {
-        _wall.transform.position = _wallStartPos + new Vector3(UnityEngine.Random.Range(-50, 50), 0, 0);
-        _wall.transform.Rotate(0f, UnityEngine.Random.Range(-180, 180), 0f, 0);
-        _wall.transform.localScale = new Vector3(UnityEngine.Random.Range(50, 100), 100, 50);
+        _wall.transform.position = _wallStartPos + new Vector3(UnityEngine.Random.Range(-100f, 100f), 0f, 0f);
+        _wall.transform.Rotate(0f, UnityEngine.Random.Range(-180f, 180f), 0f, 0f);
+        _wall.transform.localScale = new Vector3(UnityEngine.Random.Range(50f, 150f), 100f, 50f);
     }
 
     /// Showing ANN data:

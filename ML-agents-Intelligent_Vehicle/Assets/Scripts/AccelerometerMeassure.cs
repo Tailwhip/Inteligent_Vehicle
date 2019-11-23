@@ -29,7 +29,7 @@ public class AccelerometerMeassure : MonoBehaviour
     /// Function for counting acceleration
     private float acceleration(float vel)
     {
-        return Mathf.Clamp((vel / Time.fixedDeltaTime + accMax) / (2*accMax), 0, 1);
+        return Mathf.Clamp((vel / Time.fixedDeltaTime + accMax) / (2 * accMax), 0, 1);
     }
 
     float Round(float x)

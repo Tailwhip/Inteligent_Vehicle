@@ -6,7 +6,7 @@ using UnityEngine;
 public class PhototransistorMeassure : MonoBehaviour
 {
     public float intensity;
-    private float intesityMax = 120f;
+    //private float intesityMax = 120f;
     private Vector2 intensVect = new Vector2(0f, 0f);
     public GameObject lightSource;
     private float distance;
