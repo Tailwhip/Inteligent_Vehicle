@@ -163,7 +163,7 @@ public class GoalAgent : Agent {
         }
 
         /// for delta distance input: 
-        if (intensity > 3.5f)
+        if (intensity > 3.4f)
         {
             SetReward(1f);
             episodeStarts = 1;
@@ -231,7 +231,8 @@ public class GoalAgent : Agent {
 
     void move(float act0, float act1)
     {
-        rb.AddForce(this.transform.forward * Mathf.Clamp(act0, -1f, 1f) * 10300f);
+        this.transform.Translate(Vector3.forward * Mathf.Clamp(act0, -1f, 1f) * 30f);
+        //rb.AddForce(this.transform.forward * Mathf.Clamp(act0, -1f, 1f) * 10300f);
         this.transform.Rotate(0, Mathf.Clamp(act1, -1f, 1f) * 15f, 0, 0);
     }
 

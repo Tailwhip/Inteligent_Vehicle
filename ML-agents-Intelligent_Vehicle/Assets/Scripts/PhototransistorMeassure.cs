@@ -35,11 +35,11 @@ public class PhototransistorMeassure : MonoBehaviour
 
     float axisValue(float _distance)
     {
-        if (_distance > 201)
+        if (_distance > 450)
         {
             //Debug.Log("Wychodzi: " + (Mathf.Log(Mathf.Pow(0.993f, _distance + 120f) + 0.00354f, 110f) + 1.178796054f));
             //Debug.Log("Czujnik: " + (Mathf.Pow(0.993f, _distance + 120) + 0.00354f));
-            return Mathf.Pow(0.993f, _distance + 120f) + 0.00354f;
+            return Mathf.Clamp((Mathf.Pow(0.995f, _distance + 390f) + 0.003f), 0, 0.76f);
             //Mathf.Pow(0.993f, _distance + 120) + 0.00354f;
         }
 
@@ -47,7 +47,7 @@ public class PhototransistorMeassure : MonoBehaviour
         {
             //Debug.Log("Wychodzi: " + (Mathf.Log((Mathf.Pow(0.981f, _distance - 11f)) + 0.085f, 110f) + 1.178796054f));
             //Debug.Log("Czujnik: " + Mathf.Pow(0.981f, _distance - 11) + 0.085f);
-            return Mathf.Pow(0.981f, _distance - 11f) + 0.085f;
+            return Mathf.Clamp((Mathf.Pow(0.993f, _distance + 150f) + 0.003f), 0, 0.76f);
             //Mathf.Pow(0.981f, _distance - 11) + 0.085f;
         }
     }
